@@ -13,9 +13,9 @@
     "js-cookie": "^2.2.0",
     "vue": "^2.5.2",
     "vuex": "^3.0.1",
-    "vuex-persistedstate": "^2.3.2"
-  },
-  "devDependencies": {
+    "vuex-persistedstate": "^2.3.2",
+//  },
+//  "devDependencies": {
     "apidoc": "^0.17.6",
     "babel-plugin-component": "^0.9.1",
     "babel-preset-es2015": "^6.24.1",
@@ -26,7 +26,6 @@
     "moment": "^2.18.1",
     "postcss-loader": "^2.0.3",
     "style-loader": "^0.16.1",
-    "vue": "^2.2.6",
     "webpack-dev-server": "^2.4.2",
     "autoprefixer": "^7.1.2",
     "axios": "^0.16.2",
