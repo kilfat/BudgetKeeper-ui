@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "js-cookie": "^2.2.0",
-    "vue": "^2.2.6",
+    "vue": "^2.5.2",
     "vuex": "^3.0.1",
     "vuex-persistedstate": "^2.3.2",
     "apidoc": "^0.17.6",
