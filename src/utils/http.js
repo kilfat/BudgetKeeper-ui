@@ -15,7 +15,7 @@ export default {
                    baseURL: APP_URL,
                    url,
                    data: data,
-                   timeout: 20000,
+                   timeout: 60000,
                    withCredentials: true,
                    headers: {
                      Accept: JSON_TYPE,
@@ -38,7 +38,7 @@ export default {
                    url,
                    params,
                    withCredentials: true,
-                   timeout: 10000,
+                   timeout: 60000,
                    headers: {
                      Accept: JSON_TYPE
                    },
@@ -60,7 +60,7 @@ export default {
                    url,
                    data,
                    withCredentials: true,
-                   timeout: 20000,
+                   timeout: 60000,
                    headers: {
                      'Content-Type': JSON_TYPE
                    },
@@ -82,7 +82,7 @@ export default {
                    url,
                    params,
                    withCredentials: true,
-                   timeout: 10000,
+                   timeout: 60000,
                    headers: {
                      Accept: JSON_TYPE
                    },
