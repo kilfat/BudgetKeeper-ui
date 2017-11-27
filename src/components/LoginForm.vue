@@ -1,5 +1,5 @@
 <template>
-  <form v-on:submit.prevent v-if="$store.getters.authorized !== 'true'">
+  <form v-on:submit.prevent v-if="$store.getters.authorized !== true">
     <input id="username" type="text" v-model="user.username" placeholder="Username" autocomplete="username"/>
     <input id="password" v-model="user.password" type="password" placeholder="Password"
            autocomplete="current-password"/>
@@ -57,6 +57,7 @@
       checkSuccessStatus: function (response) {
         if (response.status === 200) {
           this.errorMessage = null;
+          this.setAuthorized(true);
         }
         return response;
       },

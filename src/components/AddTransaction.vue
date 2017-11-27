@@ -5,22 +5,24 @@
         class="amount-input"
         prefix-icon="icon-money"
         placeholder="Type something"
-        v-model="inputAmount">
+        v-model="form.inputAmount">
       </el-input>
     </el-form-item>
     <el-form-item label="Category">
       <el-autocomplete
-        v-model="inputCategory"
+        v-model="form.inputCategory.name"
         :fetch-suggestions="querySearchAsync"
         placeholder="Please input"
         @select="handleSelect"
       ></el-autocomplete>
     </el-form-item>
     <el-form-item label="Date">
-      <el-date-picker v-model="inputDate" type="datetime" :picker-options="pickerOptions" format="dd-MM-yyyy HH:mm:ss"
+      <el-date-picker v-model="form.inputDate" type="datetime" :picker-options="pickerOptions"
+                      format="dd-MM-yyyy HH:mm:ss"
                       placeholder="Select date and time">
       </el-date-picker>
     </el-form-item>
+    <el-button type="primary" @click="createTransaction(transaction)">Create</el-button>
     <!--<el-form-item label="Account">-->
     <!--<el-select v-model="formInline.account" clearable placeholder="select account type"-->
     <!--v-on:visible-change="selectDemo">-->
@@ -48,6 +50,7 @@
   import Bus from '../eventBus'
   import http from '../utils/http'
   import {CATEGORY_NAMES_URL} from '../store/env'
+  import {TRANSACTION_URL} from '../store/env'
 
   export default {
     name: 'db-filterinput',
@@ -56,9 +59,18 @@
         pickerOptions: {
           firstDayOfWeek: 1
         },
-        inputAmount: 0,
-        inputCategory: '',
-        inputDate: Date.now(),
+        transaction: {
+          amount: -1,
+          accountId: -1,
+          categoryId: -1,
+          date: Date.now(),
+          transactionType: 'COSTS'
+        },
+        form: {
+          inputAmount: 0,
+          inputCategory: {id: -1, value: '', name: ''},
+          inputDate: Date.now(),
+        },
         type_options: [],
         formInline: {
           account: '',
@@ -75,6 +87,12 @@
     },
 
     methods: {
+      createTransaction: function (transaction, form) {
+        transaction.categoryId = this.form.inputCategory.id;
+        transaction.amount = this.form.inputAmount;
+        transaction.date = this.form.inputDate;
+        return http.post(TRANSACTION_URL, this.$store.getters.user, transaction);
+      },
       loadAll: function () {
         return http.get(CATEGORY_NAMES_URL, this.$store.getters.user).then((response) => {
           response.data.forEach(function (e) {
@@ -97,6 +115,7 @@
         };
       },
       handleSelect(item) {
+        this.form.inputCategory = item;
         console.log(item);
       },
 

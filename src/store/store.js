@@ -1,10 +1,23 @@
 import Vue from "vue/dist/vue.esm";
-import Vuex from 'vuex'
+import Vuex from "vuex";
+import createPersistedState from "vuex-persistedstate";
+import * as Cookies from "js-cookie";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store(
   {
+    plugins: [
+      createPersistedState()
+      // ({
+      //    storage: {
+      //      paths: ['user','password', 'authorized'],
+      //      getItem: (key) => Cookies.getJSON(key),
+      //      setItem: (key, state) => Cookies.set(key, state, {expires: 3, secure: true}),
+      //      removeItem: key => Cookies.remove(key)
+      //    }
+      //  })
+    ],
     state: {
       user: {
         username: localStorage.getItem("username"),
@@ -12,6 +25,7 @@ export default new Vuex.Store(
       },
       authorized: localStorage.getItem("authorized")
     },
+
     // plugins: [
     //   createPersistedState(
     //     {
