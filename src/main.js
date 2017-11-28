@@ -7,6 +7,9 @@ import {
   Col,
   DatePicker,
   Dialog,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
   Form,
   FormItem,
   Input,
@@ -47,6 +50,9 @@ Vue.use(MenuItem);
 Vue.use(Submenu);
 Vue.use(Autocomplete);
 Vue.use(DatePicker);
+Vue.use(Dropdown);
+Vue.use(DropdownItem);
+Vue.use(DropdownMenu);
 
 locale.use(lang);
 

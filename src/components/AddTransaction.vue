@@ -1,48 +1,66 @@
 <template>
-  <el-form :inline="true" :model="formInline">
-    <el-form-item label="Value">
-      <el-input
-        class="amount-input"
-        prefix-icon="icon-money"
-        placeholder="Type something"
-        v-model="form.inputAmount">
-      </el-input>
-    </el-form-item>
-    <el-form-item label="Category">
-      <el-autocomplete
-        v-model="form.inputCategory.name"
-        :fetch-suggestions="querySearchAsync"
-        placeholder="Please input"
-        @select="handleSelect"
-      ></el-autocomplete>
-    </el-form-item>
-    <el-form-item label="Date">
-      <el-date-picker v-model="form.inputDate" type="datetime" :picker-options="pickerOptions"
-                      format="dd-MM-yyyy HH:mm:ss"
-                      placeholder="Select date and time">
-      </el-date-picker>
-    </el-form-item>
-    <el-button type="primary" @click="createTransaction(transaction)">Create</el-button>
-    <!--<el-form-item label="Account">-->
-    <!--<el-select v-model="formInline.account" clearable placeholder="select account type"-->
-    <!--v-on:visible-change="selectDemo">-->
-    <!--<el-option-->
-    <!--v-for="item in type_options"-->
-    <!--:label="item.label"-->
-    <!--:value="item.value">-->
-    <!--</el-option>-->
-    <!--</el-select>-->
-    <!--</el-form-item>-->
+  <div>
+    <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
+    <el-form :inline="true" :model="formInline">
+      <el-form-item label="Value">
+        <el-input
+          class="amount-input"
+          prefix-icon="icon-money"
+          placeholder="Type something"
+          v-model="form.inputAmount">
+        </el-input>
+      </el-form-item>
+      <el-form-item label="Category">
+        <el-autocomplete
+          v-model="form.inputCategory.name"
+          :fetch-suggestions="querySearchAsync"
+          placeholder="Please input"
+          @select="handleSelect"
+        ></el-autocomplete>
+      </el-form-item>
+      <el-form-item label="Date">
+        <el-date-picker v-model="form.inputDate" type="datetime" :picker-options="pickerOptions"
+                        format="dd-MM-yyyy HH:mm:ss"
+                        placeholder="Select date and time">
+        </el-date-picker>
+      </el-form-item>
+      <el-form-item label="Account">
+        <el-dropdown @command="handleClickAccountList" v-model="form.account">
+      <span class="el-dropdown-link">
+        Dropdown List<i class="el-icon-arrow-down el-icon--right"></i>
+      </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>Action 1</el-dropdown-item>
+            <el-dropdown-item>Action 2</el-dropdown-item>
+            <el-dropdown-item>Action 3</el-dropdown-item>
+            <el-dropdown-item>Action 4</el-dropdown-item>
+            <el-dropdown-item>Action 5</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </el-form-item>
 
-    <!--<el-form-item v-if='formInline.account' label="Category">-->
-    <!--<el-input v-model="formInline.category" placeholder="Please input suffix of category"></el-input>-->
-    <!--</el-form-item>-->
+      <el-button type="primary" @click="createTransaction(transaction)">Create</el-button>
+      <!--<el-form-item label="Account">-->
+      <!--<el-select v-model="formInline.account" clearable placeholder="select account type"-->
+      <!--v-on:visible-change="selectDemo">-->
+      <!--<el-option-->
+      <!--v-for="item in type_options"-->
+      <!--:label="item.label"-->
+      <!--:value="item.value">-->
+      <!--</el-option>-->
+      <!--</el-select>-->
+      <!--</el-form-item>-->
 
-    <!--<el-form-item v-else='formInline.account' label="Category">-->
-    <!--<el-input v-model="formInline.category" disabled placeholder="Please input suffix of category"></el-input>-->
-    <!--</el-form-item>-->
+      <!--<el-form-item v-if='formInline.account' label="Category">-->
+      <!--<el-input v-model="formInline.category" placeholder="Please input suffix of category"></el-input>-->
+      <!--</el-form-item>-->
 
-  </el-form>
+      <!--<el-form-item v-else='formInline.account' label="Category">-->
+      <!--<el-input v-model="formInline.category" disabled placeholder="Please input suffix of category"></el-input>-->
+      <!--</el-form-item>-->
+
+    </el-form>
+  </div>
 </template>
 
 <script>
@@ -74,10 +92,11 @@
         type_options: [],
         formInline: {
           account: '',
-          category: ''
+          category: '',
         },
+        errorMessage: '',
         formLabelWidth: '120px',
-        links: []
+        links: [],
       }
     },
 
@@ -91,7 +110,16 @@
         transaction.categoryId = this.form.inputCategory.id;
         transaction.amount = this.form.inputAmount;
         transaction.date = this.form.inputDate;
-        return http.post(TRANSACTION_URL, this.$store.getters.user, transaction);
+        return http.post(TRANSACTION_URL, this.$store.getters.user, transaction).then(this.chechSuccessStatus).catch(
+          (error) => this.checkErrorStatus(error));
+      },
+      chechSuccessStatus: function () {
+        this.errorMessage = '';
+      }
+      ,
+      checkErrorStatus: function (error) {
+        this.errorMessage = error.response.data.message;
+        console.log(error);
       },
       loadAll: function () {
         return http.get(CATEGORY_NAMES_URL, this.$store.getters.user).then((response) => {
@@ -147,6 +175,9 @@
         },
         500
       ),
+      handleClickAccountList: function (item) {
+        console.log(item);
+      }
     },
     mounted() {
       this.links = this.loadAll();

@@ -120,7 +120,7 @@
           this.total = response.data.length;
           this.pageSize = response.data.length;
           console.log(response.data);
-        }).catch(
+        }).then(this.errorMessage = '').catch(
           (error) => this.checkErrorStatus(error.response));
         this.loading = false;
       },
