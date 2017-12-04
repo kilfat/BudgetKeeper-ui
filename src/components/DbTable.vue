@@ -1,5 +1,6 @@
 <template>
   <div>
+    <el-button type="primary" @click="updateTable()">Refresh</el-button>
     <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
     <el-table
       :data="tableData"
@@ -90,6 +91,13 @@
       updateTable: function () {
         this.getTransactions();
         Bus.$on('filterResultData', (data) => {
+          let months_arr = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+          data.results.forEach(function (e) {
+            if (typeof e === "object") {
+              let d = new Date(e.date);
+              e["date"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
+            }
+          });
           this.tableData = data.results;
           this.total = data.total_pages;
           this.pageSize = data.count;
@@ -112,10 +120,16 @@
       dialogVisible: function () {
         this.dialogFormVisible = false;
       },
-
       getTransactions: function () {
         this.loading = true;
         http.get(TRANSACTION_URL, this.$store.getters.user).then((response) => {
+          var months_arr = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+          response.data.forEach(function (e) {
+            if (typeof e === "object") {
+              var d = new Date(e.date*1000);
+              e["date"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
+            }
+          });
           this.tableData = response.data;
           this.total = response.data.length;
           this.pageSize = response.data.length;
@@ -139,37 +153,13 @@
         console.log(response);
         return response;
       },
-//      getCustomers: function () {
-//        this.$axios.get(this.apiUrl, {
-//          params: {
-//            page: this.currentPage,
-//            account: this.account,
-//            email: this.email
-//          }
-//        }).then((response) => {
-//          this.tableData = response.data.data.results;
-//          this.total = response.data.data.total;
-//          this.pageSize = response.data.data.count;
-//          console.log(response.data.data);
-//        }).catch(function (response) {
-//          console.log(response)
-//        });
-//      },
       changePage: function (currentPage) {
         this.currentPage = currentPage;
-//        this.getCustomers()
       },
       editItem: function (index, rows) {
         this.dialogFormVisible = true;
-//        const itemId = rows[index].id;
         this.form = this.tableData[index];
-//        const idurl = 'http://127.0.0.1:8000/api/persons/detail/' + itemId;
-//        this.$axios.get(idurl).then((response) => {
-//          this.form = response.data;
-//        }).catch(function (response) {
-//          console.log(response)
-//        });
-      }
+      },
     }
   }
 </script>
@@ -199,6 +189,10 @@
 
   .error {
     color: red;
+  }
+
+  .success {
+    color: green;
   }
 
   .pagination {

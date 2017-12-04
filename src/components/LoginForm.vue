@@ -1,11 +1,14 @@
 <template>
-  <form v-on:submit.prevent v-if="$store.getters.authorized !== true">
-    <input id="username" type="text" v-model="user.username" placeholder="Username" autocomplete="username"/>
-    <input id="password" v-model="user.password" type="password" placeholder="Password"
-           autocomplete="current-password"/>
-    <button type="submit" v-on:click="doLoginAction()">Login</button>
-    <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
-  </form>
+  <div>
+    <form v-on:submit.prevent v-if="$store.getters.authorized !== true">
+      <input id="username" type="text" v-model="user.username" placeholder="Username" autocomplete="username"/>
+      <input id="password" v-model="user.password" type="password" placeholder="Password"
+             autocomplete="current-password"/>
+      <button type="submit" v-on:click="doLoginAction()">Login</button>
+      <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
+    </form>
+    <button type="submit" v-on:click="doLogoutAction()" v-if="$store.getters.authorized == true">Logout</button>
+  </div>
 </template>
 <script>
   import http from '../utils/http'
@@ -39,10 +42,17 @@
           (error) => this.checkErrorStatus(error.response));
 
       },
+      doLogoutAction: function () {
+        if (this.$store.getters.authorized == true) {
+          this.setAuthorized(false);
+          this.setUsername("");
+          this.setPassword("");
+        }
+      }
+      ,
       checkErrorStatus: function (response) {
         if (!response) {
           this.errorMessage = "Connection problems! ";
-//          return response;
         }
         if (response) {
           if (!response.status) {

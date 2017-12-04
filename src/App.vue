@@ -1,8 +1,4 @@
 <template>
-  <!--<div id="app" class="container">-->
-  <!---->
-  <!--<HelloWorld></HelloWorld>-->
-  <!--</div>-->
   <div class="wrapper">
     <el-col :span="20" class="login-form">
       <db-header></db-header>
@@ -10,9 +6,6 @@
     </el-col>
 
     <el-row class="container">
-      <!--<el-col :span="4" class="menu">-->
-
-      <!--</el-col>-->
       <el-col class="content">
         <db-sidebar></db-sidebar>
         <div class="line"></div>
@@ -33,7 +26,6 @@
 </template>
 
 <script>
-  import HelloWorld from './components/HelloWorld.vue'
   import LoginForm from './components/LoginForm.vue'
   import DbHeader from './components/DbHeader.vue'
   import DbSidebar from './components/DbSidebar.vue'
@@ -42,13 +34,11 @@
   import DbFooter from './components/DbFooter.vue'
   import ElRow from "element-ui/packages/row/src/row";
   import AddTransaction from './components/AddTransaction.vue'
-  //  import ElMenu from "element-ui/packages/menu/src/menu"
 
   export default {
     name: 'app',
     components: {
       LoginForm,
-      HelloWorld,
       ElRow, DbHeader,
       DbSidebar,
       DbFilterinput,

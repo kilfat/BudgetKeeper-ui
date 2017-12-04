@@ -1,13 +1,27 @@
 <template>
   <div>
-    <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
+    <el-alert v-if="errorMessage"
+              title="Error:"
+              type="error"
+              :closable="false">
+      {{errorMessage}}
+    </el-alert>
+    <el-alert v-if="successMessage"
+              title="Success:"
+              type="success">
+      {{successMessage}}
+    </el-alert>
     <el-form :inline="true" :model="formInline">
       <el-form-item label="Value">
         <el-input
+          autofocus
           class="amount-input"
-          prefix-icon="icon-money"
+          suffix-icon="icon-money"
           placeholder="Type something"
-          v-model="form.inputAmount">
+          v-model="form.inputAmount"
+          clearable
+          @focus="$event.target.select()"
+        >
         </el-input>
       </el-form-item>
       <el-form-item label="Category">
@@ -19,46 +33,26 @@
         ></el-autocomplete>
       </el-form-item>
       <el-form-item label="Date">
-        <el-date-picker v-model="form.inputDate" type="datetime" :picker-options="pickerOptions"
-                        format="dd-MM-yyyy HH:mm:ss"
-                        placeholder="Select date and time">
+        <el-date-picker v-model="form.inputDate"
+                        :picker-options="pickerOptions"
+                        format="dd.MM.yy"
+                        placeholder="DD.MM.YY"
+                        >
         </el-date-picker>
       </el-form-item>
       <el-form-item label="Account">
-        <el-dropdown @command="handleClickAccountList" v-model="form.account">
-      <span class="el-dropdown-link">
-        Dropdown List<i class="el-icon-arrow-down el-icon--right"></i>
-      </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>Action 1</el-dropdown-item>
-            <el-dropdown-item>Action 2</el-dropdown-item>
-            <el-dropdown-item>Action 3</el-dropdown-item>
-            <el-dropdown-item>Action 4</el-dropdown-item>
-            <el-dropdown-item>Action 5</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
+        <el-select v-model="form.inputAccount" filterable placeholder="Select" clearable>
+          <el-option label="Account"
+                     v-for="item in accounts"
+                     :key="item.id"
+                     :label="item.value"
+                     :value="item">
+            <span style="float: left">{{ item.value }}</span>
+            <span style="float: right; color: #8492a6; font-size: 13px">{{ item.amount }}</span>
+          </el-option>
+        </el-select>
       </el-form-item>
-
       <el-button type="primary" @click="createTransaction(transaction)">Create</el-button>
-      <!--<el-form-item label="Account">-->
-      <!--<el-select v-model="formInline.account" clearable placeholder="select account type"-->
-      <!--v-on:visible-change="selectDemo">-->
-      <!--<el-option-->
-      <!--v-for="item in type_options"-->
-      <!--:label="item.label"-->
-      <!--:value="item.value">-->
-      <!--</el-option>-->
-      <!--</el-select>-->
-      <!--</el-form-item>-->
-
-      <!--<el-form-item v-if='formInline.account' label="Category">-->
-      <!--<el-input v-model="formInline.category" placeholder="Please input suffix of category"></el-input>-->
-      <!--</el-form-item>-->
-
-      <!--<el-form-item v-else='formInline.account' label="Category">-->
-      <!--<el-input v-model="formInline.category" disabled placeholder="Please input suffix of category"></el-input>-->
-      <!--</el-form-item>-->
-
     </el-form>
   </div>
 </template>
@@ -69,6 +63,7 @@
   import http from '../utils/http'
   import {CATEGORY_NAMES_URL} from '../store/env'
   import {TRANSACTION_URL} from '../store/env'
+  import {ACCOUNT_NAMES_URL} from '../store/env'
 
   export default {
     name: 'db-filterinput',
@@ -85,6 +80,7 @@
           transactionType: 'COSTS'
         },
         form: {
+          inputAccount: null,
           inputAmount: 0,
           inputCategory: {id: -1, value: '', name: ''},
           inputDate: Date.now(),
@@ -95,8 +91,10 @@
           category: '',
         },
         errorMessage: '',
+        successMessage: '',
         formLabelWidth: '120px',
         links: [],
+        accounts: []
       }
     },
 
@@ -108,16 +106,28 @@
     methods: {
       createTransaction: function (transaction, form) {
         transaction.categoryId = this.form.inputCategory.id;
-        transaction.amount = this.form.inputAmount;
+        transaction.amount = parseInt(this.form.inputAmount);
+        transaction.accountId = this.form.inputAccount.id;
         transaction.date = this.form.inputDate;
         return http.post(TRANSACTION_URL, this.$store.getters.user, transaction).then(this.chechSuccessStatus).catch(
           (error) => this.checkErrorStatus(error));
       },
       chechSuccessStatus: function () {
         this.errorMessage = '';
+        this.$message({
+                        showClose: true,
+                        message: 'Transaction created',
+                        type: 'success'
+                      });
+        this.successMessage = 'Transaction created';
       }
       ,
       checkErrorStatus: function (error) {
+        this.$message({
+                        showClose: true,
+                        message: 'Transaction creation error!',
+                        type: 'error'
+                      });
         this.errorMessage = error.response.data.message;
         console.log(error);
       },
@@ -129,6 +139,17 @@
             }
           });
           this.links = response.data;
+          console.log(response.data);
+        });
+      },
+      loadAllAccounts: function () {
+        return http.get(ACCOUNT_NAMES_URL, this.$store.getters.user).then((response) => {
+          response.data.forEach(function (e) {
+            if (typeof e === "object") {
+              e["value"] = e.accountType;
+            }
+          });
+          this.accounts = response.data;
           console.log(response.data);
         });
       },
@@ -156,31 +177,15 @@
         }
 
       },
-      filterResultData: _.debounce(
-        function () {
-//          this.$axios.get("http://127.0.0.1:8000/api/persons", {
-//            params: {
-//              account: this.formInline.account,
-//              category: this.formInline.category,
-//            }
-//          }).then((response) => {
-//            response.data['account'] = this.formInline.account;
-//            response.data['category'] = this.formInline.category;
-//            Bus.$emit('filterResultData', response.data);
-//            console.log(response.data);
-//          }).catch(function (response) {
-//            console.log(response)
-//          });
-//
-        },
-        500
-      ),
       handleClickAccountList: function (item) {
+        this.form.inputAccount.account = item;
+        this.form.inputAccount.name = item.accountType + " " + item.amount;
         console.log(item);
       }
     },
     mounted() {
       this.links = this.loadAll();
+      this.accounts = this.loadAllAccounts();
     }
   }
 </script>
