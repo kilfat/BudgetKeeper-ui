@@ -31,6 +31,7 @@
   import DbSidebar from './components/DbSidebar.vue'
   import DbFilterinput from './components/DbFilterinput.vue'
   import DbTable from './components/DbTable.vue'
+  import DbModal from './components/DbModal.vue'
   import DbFooter from './components/DbFooter.vue'
   import ElRow from "element-ui/packages/row/src/row";
   import AddTransaction from './components/AddTransaction.vue'
@@ -43,6 +44,7 @@
       DbSidebar,
       DbFilterinput,
       DbTable,
+      DbModal,
       DbFooter,
       AddTransaction
     }

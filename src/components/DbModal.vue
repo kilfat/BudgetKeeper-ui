@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="Edit" v-model="dialogFormVisible" :close-on-click-modal="false" :show-close="false">
+  <el-dialog title="Edit" :visible.sync="dialogFormVisible" v-model="dialogFormVisible" :close-on-click-modal="false" :show-close="false">
     <el-form :model="form">
       <el-form-item label="Amount" :label-width="formLabelWidth">
         <el-input v-model="form.amount" auto-complete="off"></el-input>
@@ -54,7 +54,6 @@
             console.log(error);
           });
         this.canclemodal();
-//        location.reload();
       },
       canclemodal: function () {
         this.$emit('canclemodal');
