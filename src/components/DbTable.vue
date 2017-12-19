@@ -22,7 +22,7 @@
         label="Category">
       </el-table-column>
       <el-table-column
-        prop="date"
+        prop="dateString"
         label="Date"
         width="200px">
       </el-table-column>
@@ -91,8 +91,7 @@
           data.results.forEach(function (e) {
             if (typeof e === "object") {
               let d = new Date(e.date);
-              e["date"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
-              e["date_value"] = d;
+              e["dateString"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
             }
           });
           this.tableData = data.results;
@@ -110,8 +109,8 @@
           response.data.forEach(function (e) {
             if (typeof e === "object") {
               var d = new Date(e.date * 1000);
-              e["date"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
-              e["date_value"] = d;
+              e["dateString"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
+              e["date"] = d;
             }
           });
           this.tableData = response.data;

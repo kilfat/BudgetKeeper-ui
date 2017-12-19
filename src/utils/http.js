@@ -77,7 +77,7 @@ export default {
   delete(url, USER, params)
   {
     return axios({
-                   method: 'get',
+                   method: 'delete',
                    baseURL: APP_URL,
                    url,
                    params,

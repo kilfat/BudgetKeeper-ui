@@ -138,7 +138,7 @@
           if (valid) {
             this.newCategory.userName = this.$store.getters.username;
             http.post(CATEGORY_URL, this.$store.getters.user, this.newCategory).then(
-              this.chechSuccessStatus("Category created")).catch((error) => this.checkErrorStatus(error));
+              this.checkSuccessStatus("Category created")).catch((error) => this.checkErrorStatus(error));
             this.createCategory = false;
           } else {
             this.checkErrorStatus(null, "Category creation error!");
@@ -150,11 +150,11 @@
         transaction.categoryId = this.form.inputCategory.id;
         transaction.amount = parseInt(this.form.inputAmount);
         transaction.accountId = this.form.inputAccount.id;
-        transaction.date = this.form.inputDate;
-        return http.post(TRANSACTION_URL, this.$store.getters.user, transaction).then(this.chechSuccessStatus()).catch(
+        transaction.date = (this.form.inputDate.getTime() / 1000 - this.form.inputDate.getTimezoneOffset() * 60) * 1000;
+        return http.post(TRANSACTION_URL, this.$store.getters.user, transaction).then(this.checkSuccessStatus()).catch(
           (error) => this.checkErrorStatus(error));
       },
-      chechSuccessStatus: function (message) {
+      checkSuccessStatus: function (message) {
         if (!message) {
           message = 'Transaction created';
         }

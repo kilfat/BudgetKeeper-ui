@@ -35,7 +35,7 @@
           ></el-autocomplete>
         </el-form-item>
         <el-form-item label="Date">
-          <el-date-picker v-model="form.date_value"
+          <el-date-picker v-model="form.date"
                           :picker-options="pickerOptions"
                           format="dd.MM.yy"
                           placeholder="DD.MM.YY"
@@ -57,8 +57,11 @@
       </el-form>
     </div>
     <div slot="footer" class="dialog-footer">
-      <el-button :plain="true" type="danger" v-on:click="cancelmodal">Cancel</el-button>
-      <el-button :plain="true" @click="updateForm(form)">Save</el-button>
+      <div id="delete">
+        <el-button :plain="true" type="danger" @click="deleteTransaction(form)">Delete</el-button>
+      </div>
+      <el-button :plain="true" type="info" v-on:click="cancelmodal">Cancel</el-button>
+      <el-button :plain="true" type="primary" @click="updateForm(form)">Save</el-button>
     </div>
   </el-dialog>
 </template>
@@ -80,7 +83,14 @@
         },
         type_options: [],
         errorMessage: '',
-        successMessage: ''
+        successMessage: '',
+        transaction: {
+          amount: -1,
+          accountId: -1,
+          categoryId: -1,
+          date: Date.now(),
+          transactionType: 'COSTS'
+        }
       }
     },
     props: ['dialogFormVisible', 'form'],
@@ -88,31 +98,52 @@
     computed: {},
 
     methods: {
+      deleteTransaction: function (formName) {
+        var itemId = formName.id.valueOf();
+        http.delete(TRANSACTION_URL + itemId, this.$store.getters.user)
+          .then((response) => this.checkSuccessStatus(response, "Successful deleted")).catch(
+          (error) => this.checkErrorStatus(error, "Unsuccessfull deletion!"))
+      },
       updateForm: function (formName) {
         var itemId = formName.id.valueOf();
-        formName.amount = Number(formName.amount);
-        formName.date = Date.now(); //this.form.date_value;
-        http.put(TRANSACTION_URL + itemId, this.$store.getters.user, formName)
-          .then((response) => this.chechSuccessStatus).catch((error) => this.checkErrorStatus(error))
+        //      formName.amount = Number(formName.amount);
+//        formName.date = this.form.date;
+
+        this.transaction.categoryId = formName.categoryId;
+        this.transaction.amount = Number(formName.amount);
+        this.transaction.accountId = formName.accountId;
+        this.transaction.date =
+          (formName.date.getTime() / 1000 - formName.date.getTimezoneOffset() * 60) * 1000;
+        http.put(TRANSACTION_URL + itemId, this.$store.getters.user, this.transaction)
+          .then((response) => this.checkSuccessStatus(response)).catch((error) => this.checkErrorStatus(error))
       },
-      chechSuccessStatus: function () {
+      checkSuccessStatus(response, message) {
+        if (!message) {
+          message = 'Transaction edited';
+        }
         this.errorMessage = '';
         this.$message({
                         showClose: true,
-                        message: 'Transaction edited',
+                        message: message,
                         type: 'success'
                       });
-        this.successMessage = 'Transaction edited';
-        this.form = response.data;
         this.cancelmodal();
+
       },
-      cancelmodal: function () {
+      cancelmodal() {
+        this.errorMessage = '';
         this.$emit('cancelmodal');
       },
-      checkErrorStatus: function (error) {
+      checkErrorStatus(error, message) {
+        if (!message) {
+          message = 'Transaction edition error!';
+        }
+        if (error.response === undefined) {
+          return false;
+        }
         this.$message({
                         showClose: true,
-                        message: 'Transaction edition error!',
+                        message: message,
                         type: 'error'
                       });
         this.errorMessage = error.response.data.message;
@@ -136,3 +167,8 @@
   }
 
 </script>
+<style>
+  #delete {
+    float: left;
+  }
+</style>
