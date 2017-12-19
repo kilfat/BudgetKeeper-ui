@@ -7,6 +7,7 @@
       <button type="submit" v-on:click="doLoginAction()">Login</button>
       <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
     </form>
+    <span class="userName" v-if="$store.getters.authorized === true">{{ $store.getters.username }}</span>
     <button type="submit" v-on:click="doLogoutAction()" v-if="$store.getters.authorized == true">Logout</button>
   </div>
 </template>
@@ -88,5 +89,9 @@
 <style>
   .error {
     color: red;
+  }
+
+  .userName {
+    color: white;
   }
 </style>

@@ -6,11 +6,6 @@
               :closable="false">
       {{errorMessage}}
     </el-alert>
-    <el-alert v-if="successMessage"
-              title="Success:"
-              type="success">
-      {{successMessage}}
-    </el-alert>
     <el-form :inline="true" :model="formInline">
       <el-form-item label="Value">
         <el-input
@@ -32,12 +27,13 @@
           @select="handleSelect"
         ></el-autocomplete>
       </el-form-item>
+      <el-button round icon="el-icon-plus" size="small" @click="createCategory = true"></el-button>
       <el-form-item label="Date">
         <el-date-picker v-model="form.inputDate"
                         :picker-options="pickerOptions"
                         format="dd.MM.yy"
                         placeholder="DD.MM.YY"
-                        >
+        >
         </el-date-picker>
       </el-form-item>
       <el-form-item label="Account">
@@ -54,6 +50,21 @@
       </el-form-item>
       <el-button type="primary" @click="createTransaction(transaction)">Create</el-button>
     </el-form>
+    <el-dialog
+      title="Create category"
+      :visible.sync="createCategory"
+      width="30%">
+      <el-form :model="newCategory" ref="newCategory" :rules="rules">
+        <el-form-item prop="name">
+          <el-input placeholder="New category name" v-model="newCategory.name" clearable autofocus
+                    auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="createCategory = false">Cancel</el-button>
+          <el-button type="primary" @click="createNewCategory('newCategory')">Create</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -63,9 +74,16 @@
   import http from '../utils/http'
   import {CATEGORY_NAMES_URL} from '../store/env'
   import {TRANSACTION_URL} from '../store/env'
+  import {CATEGORY_URL} from '../store/env'
   import {ACCOUNT_NAMES_URL} from '../store/env'
+  import ElButton from "../../node_modules/element-ui/packages/button/src/button.vue";
+  import ElFormItem from "../../node_modules/element-ui/packages/form/src/form-item.vue";
 
   export default {
+    components: {
+      ElFormItem,
+      ElButton
+    },
     name: 'db-filterinput',
     data() {
       return {
@@ -94,7 +112,18 @@
         successMessage: '',
         formLabelWidth: '120px',
         links: [],
-        accounts: []
+        accounts: [],
+        createCategory: false,
+        newCategory: {
+          name: '',
+          userName: ''
+        },
+        rules: {
+          name: [
+            {required: true, message: 'Please input Category name', trigger: 'blur'},
+            {min: 5, max: 50, message: 'Length should be 5 to 50', trigger: 'blur'}
+          ]
+        }
       }
     },
 
@@ -104,32 +133,53 @@
     },
 
     methods: {
+      createNewCategory(newCategory) {
+        this.$refs[newCategory].validate((valid) => {
+          if (valid) {
+            this.newCategory.userName = this.$store.getters.username;
+            http.post(CATEGORY_URL, this.$store.getters.user, this.newCategory).then(
+              this.chechSuccessStatus("Category created")).catch((error) => this.checkErrorStatus(error));
+            this.createCategory = false;
+          } else {
+            this.checkErrorStatus(null, "Category creation error!");
+            return false;
+          }
+        });
+      },
       createTransaction: function (transaction, form) {
         transaction.categoryId = this.form.inputCategory.id;
         transaction.amount = parseInt(this.form.inputAmount);
         transaction.accountId = this.form.inputAccount.id;
         transaction.date = this.form.inputDate;
-        return http.post(TRANSACTION_URL, this.$store.getters.user, transaction).then(this.chechSuccessStatus).catch(
+        return http.post(TRANSACTION_URL, this.$store.getters.user, transaction).then(this.chechSuccessStatus()).catch(
           (error) => this.checkErrorStatus(error));
       },
-      chechSuccessStatus: function () {
+      chechSuccessStatus: function (message) {
+        if (!message) {
+          message = 'Transaction created';
+        }
         this.errorMessage = '';
         this.$message({
                         showClose: true,
-                        message: 'Transaction created',
+                        message: message,
                         type: 'success'
                       });
         this.successMessage = 'Transaction created';
       }
       ,
-      checkErrorStatus: function (error) {
+      checkErrorStatus: function (error, message) {
+        if (!message) {
+          message = 'Transaction creation error!';
+        }
         this.$message({
                         showClose: true,
-                        message: 'Transaction creation error!',
+                        message: message,
                         type: 'error'
                       });
-        this.errorMessage = error.response.data.message;
-        console.log(error);
+        if (error) {
+          this.errorMessage = error.response.data.message;
+          console.log(error);
+        }
       },
       loadAll: function () {
         return http.get(CATEGORY_NAMES_URL, this.$store.getters.user).then((response) => {
@@ -139,6 +189,7 @@
             }
           });
           this.links = response.data;
+          this.setLinks(this.links);
           console.log(response.data);
         });
       },
@@ -150,6 +201,7 @@
             }
           });
           this.accounts = response.data;
+          this.setAccounts(this.accounts);
           console.log(response.data);
         });
       },
@@ -181,7 +233,13 @@
         this.form.inputAccount.account = item;
         this.form.inputAccount.name = item.accountType + " " + item.amount;
         console.log(item);
-      }
+      },
+      setLinks(links) {
+        this.$store.dispatch('setLinks', links);
+      },
+      setAccounts(accounts) {
+        this.$store.dispatch('setAccounts', accounts);
+      },
     },
     mounted() {
       this.links = this.loadAll();

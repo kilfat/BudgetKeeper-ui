@@ -1,7 +1,6 @@
 import Vue from "vue/dist/vue.esm";
 import Vuex from "vuex";
 import createPersistedState from "vuex-persistedstate";
-import * as Cookies from "js-cookie";
 
 Vue.use(Vuex);
 
@@ -23,7 +22,9 @@ export default new Vuex.Store(
         username: localStorage.getItem("username"),
         password: localStorage.getItem("password")
       },
-      authorized: localStorage.getItem("authorized")
+      authorized: localStorage.getItem("authorized"),
+      links: localStorage.getItem('links'),
+      accounts: localStorage.getItem('accounts')
     },
 
     // plugins: [
@@ -54,6 +55,12 @@ export default new Vuex.Store(
       },
       CLEAR_AUTHORIZED(state) {
         state.authorized = 'false';
+      },
+      SET_LINKS(state, links) {
+        state.links = links;
+      },
+      SET_ACCOUNTS(state, accounts) {
+        state.accounts = accounts;
       }
     },
     actions: {
@@ -91,13 +98,29 @@ export default new Vuex.Store(
       },
       clearAuthorized({commit}) {
         commit('CLEAR_AUTHORIZED');
+      },
+      setLinks({commit}, links) {
+        commit('SET_LINKS', links);
+        setTimeout(() => {
+          localStorage.setItem("links", links);
+          commit('SET_LINKS', links);
+        }, 1000);
+      },
+      setAccounts({commit}, accounts) {
+        commit('SET_ACCOUNTS', accounts);
+        setTimeout(() => {
+          localStorage.setItem("accounts", accounts);
+          commit('SET_ACCOUNTS', accounts);
+        }, 1000);
       }
     },
     getters: {
       username: state => state.user.username,
       password: state => state.user.password,
       authorized: state => state.authorized,
-      user: state => state.user
+      user: state => state.user,
+      links: state => state.links,
+      accounts: state => state.accounts
     }
   }
 );

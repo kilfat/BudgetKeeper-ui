@@ -41,7 +41,7 @@
     <el-pagination class="pagination" layout="prev, pager, next" :total="total" :page-size="pageSize"
                    v-on:current-change="changePage">
     </el-pagination>
-    <db-modal :dialogFormVisible="dialogFormVisible" :form="form" v-on:canclemodal="dialogVisible"></db-modal>
+    <db-modal :dialogFormVisible="dialogFormVisible" :form="form" v-on:cancelmodal="dialogVisible"></db-modal>
   </div>
 
 </template>
@@ -60,14 +60,10 @@
         total: 0,
         pageSize: 10,
         currentPage: 1,
-//        account: '',
-//        email: '',
         dialogFormVisible: false,
         form: '',
         errorMessage: null,
         loading: false
-//        ,
-//        isAuthorizate: false
       }
     },
     watch: {
@@ -96,27 +92,14 @@
             if (typeof e === "object") {
               let d = new Date(e.date);
               e["date"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
+              e["date_value"] = d;
             }
           });
           this.tableData = data.results;
           this.total = data.total_pages;
           this.pageSize = data.count;
-//        this.email = data.email;
-//        this.account = data.account;
         });
       },
-      tableRowClassName({row, rowIndex}) {
-//        var asd = 1;
-//        asd++;
-//        alert(rowIndex);
-//        if (rowIndex === 1) {
-//          return 'warning-row';
-//        } else if (rowIndex === 3) {
-//          return 'success-row';
-//        }
-        return '';
-      },
-
       dialogVisible: function () {
         this.dialogFormVisible = false;
       },
@@ -126,8 +109,9 @@
           var months_arr = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
           response.data.forEach(function (e) {
             if (typeof e === "object") {
-              var d = new Date(e.date*1000);
+              var d = new Date(e.date * 1000);
               e["date"] = d.getDate() + '.' + months_arr[d.getMonth()] + '.' + d.getFullYear();
+              e["date_value"] = d;
             }
           });
           this.tableData = response.data;
